@@ -1,30 +1,62 @@
 package main
 
 import (
+	"bufio"
 	"flag"
 	"fmt"
+	"log"
 	"os"
 )
 
 func main() {
 
-	filePointer := flag.String("c", "test.txt", "a file")
-	fileSize := getFileSize(filePointer)
-
+	byteCountPointer := flag.String("c", "", "a file")
+	numberOfLinesPointer := flag.String("l", "", "a file")
 	flag.Parse()
 
-	fmt.Println(fileSize, ":", *filePointer)
+	if *byteCountPointer != "" {
+		getFileSizeInBytes(byteCountPointer)
+		os.Exit(0)
+	}
 
-	// fmt.Println("tail:", flag.Args())
+	if *numberOfLinesPointer != "" {
+		getNumberOfLines(numberOfLinesPointer)
+		os.Exit(0)
+	}
+
 }
 
-func getFileSize(fileName *string) int64 {
-	fileInfo, err := os.Stat(*fileName)
+func getFileSizeInBytes(file *string) {
+	fileInfo, err := os.Stat(*file)
 
 	if err != nil {
 		fmt.Println(err)
-		return 0
+		return
 	}
 
-	return fileInfo.Size()
+	fmt.Println(fileInfo, ":", *file)
+}
+
+func getNumberOfLines(file *string) {
+	fileInfo, err := os.Open(*file)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer fileInfo.Close()
+
+	scanner := bufio.NewScanner(fileInfo)
+
+	lineNumber := 1
+
+	for scanner.Scan() {
+		lineNumber++
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(lineNumber, ":", *file)
 }
