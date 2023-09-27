@@ -14,6 +14,7 @@ func main() {
 	byteCountPointer := flag.String("c", "", "a file")
 	numberOfLinesPointer := flag.String("l", "", "a file")
 	numberOfWordsPointer := flag.String("w", "", "a file")
+	numberOfCharsPointer := flag.String("m", "", "a file")
 
 	flag.Parse()
 
@@ -29,6 +30,11 @@ func main() {
 
 	if *numberOfWordsPointer != "" {
 		getNumberOfWords(numberOfWordsPointer)
+		os.Exit(0)
+	}
+
+	if *numberOfCharsPointer != "" {
+		getNumberOfChars(numberOfCharsPointer)
 		os.Exit(0)
 	}
 
@@ -94,4 +100,30 @@ func getNumberOfWords(file *string) {
 	}
 
 	fmt.Println(wordCount, ":", *file)
+}
+
+func getNumberOfChars(file *string) {
+	fileInfo, err := os.Open(*file)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	defer fileInfo.Close()
+
+	scanner := bufio.NewScanner(fileInfo)
+
+	characterCount := 0
+
+	for scanner.Scan() {
+
+		line := scanner.Text()
+		characterCount += len(line)
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
+	}
+
+	fmt.Println(characterCount, ":", *file)
 }
