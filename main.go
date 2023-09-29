@@ -11,47 +11,66 @@ import (
 
 func main() {
 
-	byteCountPointer := flag.String("c", "", "a file")
-	numberOfLinesPointer := flag.String("l", "", "a file")
-	numberOfWordsPointer := flag.String("w", "", "a file")
-	numberOfCharsPointer := flag.String("m", "", "a file")
+	byteCountPointer := flag.Bool("c", false, "a file")
+	numberOfLinesPointer := flag.Bool("l", false, "a file")
+	numberOfWordsPointer := flag.Bool("w", false, "a file")
+	numberOfCharsPointer := flag.Bool("m", false, "a file")
 
 	flag.Parse()
 
-	if *byteCountPointer != "" {
-		getFileSizeInBytes(byteCountPointer)
+	numberOfFlags := flag.NFlag()
+	arg := flag.Arg(0)
+
+	if numberOfFlags == 0 {
+		fileSizeInBytes := getFileSizeInBytes(&arg)
+		numberOfLines := getNumberOfLines(&arg)
+		numberOfWords := getNumberOfWords(&arg)
+
+		fmt.Printf("%o \n", fileSizeInBytes)
+		fmt.Printf("%o \n", numberOfLines)
+		fmt.Printf("%o \n", numberOfWords)
+		fmt.Printf("%s \n", flag.Arg(0))
 		os.Exit(0)
 	}
 
-	if *numberOfLinesPointer != "" {
-		getNumberOfLines(numberOfLinesPointer)
-		os.Exit(0)
+	if *byteCountPointer {
+		fileSizeInBytes := getFileSizeInBytes(&arg)
+		fmt.Printf("%o \n", fileSizeInBytes)
 	}
 
-	if *numberOfWordsPointer != "" {
-		getNumberOfWords(numberOfWordsPointer)
-		os.Exit(0)
+	if *numberOfLinesPointer {
+		numberOfLines := getNumberOfLines(&arg)
+		fmt.Printf("%o \n", numberOfLines)
 	}
 
-	if *numberOfCharsPointer != "" {
-		getNumberOfChars(numberOfCharsPointer)
-		os.Exit(0)
+	if *numberOfWordsPointer {
+		numberOfWords := getNumberOfWords(&arg)
+		fmt.Printf("%o \n", numberOfWords)
 	}
 
+	if *numberOfCharsPointer {
+		numberOfChars := getNumberOfChars(&arg)
+		fmt.Printf("%o \n", numberOfChars)
+	}
+
+	if flag.NArg() > 0 {
+		fmt.Printf("%s \n", flag.Arg(0))
+	}
+
+	os.Exit(0)
 }
 
-func getFileSizeInBytes(file *string) {
+func getFileSizeInBytes(file *string) int64 {
 	fileInfo, err := os.Stat(*file)
 
 	if err != nil {
-		fmt.Println(err)
-		return
+		log.Fatal(err)
 	}
 
-	fmt.Println(fileInfo, ":", *file)
+	return fileInfo.Size()
 }
 
-func getNumberOfLines(file *string) {
+func getNumberOfLines(file *string) int {
 	fileInfo, err := os.Open(*file)
 
 	if err != nil {
@@ -72,10 +91,10 @@ func getNumberOfLines(file *string) {
 		log.Fatal(err)
 	}
 
-	fmt.Println(lineNumber, ":", *file)
+	return lineNumber
 }
 
-func getNumberOfWords(file *string) {
+func getNumberOfWords(file *string) int {
 	fileInfo, err := os.Open(*file)
 
 	if err != nil {
@@ -99,10 +118,10 @@ func getNumberOfWords(file *string) {
 		log.Fatal(err)
 	}
 
-	fmt.Println(wordCount, ":", *file)
+	return wordCount
 }
 
-func getNumberOfChars(file *string) {
+func getNumberOfChars(file *string) int {
 	fileInfo, err := os.Open(*file)
 
 	if err != nil {
@@ -125,5 +144,5 @@ func getNumberOfChars(file *string) {
 		log.Fatal(err)
 	}
 
-	fmt.Println(characterCount, ":", *file)
+	return characterCount
 }
