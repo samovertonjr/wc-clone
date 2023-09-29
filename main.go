@@ -27,32 +27,32 @@ func main() {
 		numberOfWords := getNumberOfWords(&arg)
 		numberOfChars := getNumberOfChars(&arg)
 
-		fmt.Printf("%o Bytes \n", fileSizeInBytes)
-		fmt.Printf("%o Lines \n", numberOfLines)
-		fmt.Printf("%o Words \n", numberOfWords)
-		fmt.Printf("%o Chars \n", numberOfChars)
+		fmt.Printf("%d Bytes \n", fileSizeInBytes)
+		fmt.Printf("%d Lines \n", numberOfLines)
+		fmt.Printf("%d Words \n", numberOfWords)
+		fmt.Printf("%d Chars \n", numberOfChars)
 		fmt.Printf("%s \n", flag.Arg(0))
 		os.Exit(0)
 	}
 
 	if *byteCountPointer {
 		fileSizeInBytes := getFileSizeInBytes(&arg)
-		fmt.Printf("%o Bytes \n", fileSizeInBytes)
+		fmt.Printf("%d Bytes \n", fileSizeInBytes)
 	}
 
 	if *numberOfLinesPointer {
 		numberOfLines := getNumberOfLines(&arg)
-		fmt.Printf("%o Lines \n", numberOfLines)
+		fmt.Printf("%d Lines \n", numberOfLines)
 	}
 
 	if *numberOfWordsPointer {
 		numberOfWords := getNumberOfWords(&arg)
-		fmt.Printf("%o Words \n", numberOfWords)
+		fmt.Printf("%d Words \n", numberOfWords)
 	}
 
 	if *numberOfCharsPointer {
 		numberOfChars := getNumberOfChars(&arg)
-		fmt.Printf("%o Chars \n", numberOfChars)
+		fmt.Printf("%d Chars \n", numberOfChars)
 	}
 
 	if flag.NArg() > 0 {
