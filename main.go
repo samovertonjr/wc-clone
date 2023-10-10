@@ -2,8 +2,10 @@ package main
 
 import (
 	"bufio"
+	"bytes"
 	"flag"
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"strings"
@@ -18,14 +20,32 @@ func main() {
 
 	flag.Parse()
 
+	var data []byte
+	var err error
 	numberOfFlags := flag.NFlag()
 	arg := flag.Arg(0)
 
+	stat, err := os.Stdin.Stat()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	if (stat.Mode() & os.ModeCharDevice) == 0 {
+		data, err = io.ReadAll(os.Stdin)
+
+	} else {
+		data, err = os.ReadFile(arg)
+	}
+
 	if numberOfFlags == 0 {
-		fileSizeInBytes := getFileSizeInBytes(&arg)
-		numberOfLines := getNumberOfLines(&arg)
-		numberOfWords := getNumberOfWords(&arg)
-		numberOfChars := getNumberOfChars(&arg)
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		fileSizeInBytes := getFileSizeInBytes(data)
+		numberOfLines := getNumberOfLines(data)
+		numberOfWords := getNumberOfWords(data)
+		numberOfChars := getNumberOfChars(data)
 
 		fmt.Printf("%d Bytes \n", fileSizeInBytes)
 		fmt.Printf("%d Lines \n", numberOfLines)
@@ -36,22 +56,22 @@ func main() {
 	}
 
 	if *byteCountPointer {
-		fileSizeInBytes := getFileSizeInBytes(&arg)
+		fileSizeInBytes := getFileSizeInBytes(data)
 		fmt.Printf("%d Bytes \n", fileSizeInBytes)
 	}
 
 	if *numberOfLinesPointer {
-		numberOfLines := getNumberOfLines(&arg)
+		numberOfLines := getNumberOfLines(data)
 		fmt.Printf("%d Lines \n", numberOfLines)
 	}
 
 	if *numberOfWordsPointer {
-		numberOfWords := getNumberOfWords(&arg)
+		numberOfWords := getNumberOfWords(data)
 		fmt.Printf("%d Words \n", numberOfWords)
 	}
 
 	if *numberOfCharsPointer {
-		numberOfChars := getNumberOfChars(&arg)
+		numberOfChars := getNumberOfChars(data)
 		fmt.Printf("%d Chars \n", numberOfChars)
 	}
 
@@ -62,28 +82,26 @@ func main() {
 	os.Exit(0)
 }
 
-func getFileSizeInBytes(file *string) int64 {
-	fileInfo, err := os.Stat(*file)
+func getFileSizeInBytes(data []byte) int {
+	var size int
+	reader := bytes.NewReader(data)
 
-	if err != nil {
+	scanner := bufio.NewScanner(reader)
+	for scanner.Scan() {
+		size += len(scanner.Text()) + 1
+	}
+	if err := scanner.Err(); err != nil {
 		log.Fatal(err)
 	}
-
-	return fileInfo.Size()
+	return size
 }
 
-func getNumberOfLines(file *string) int {
-	fileInfo, err := os.Open(*file)
+func getNumberOfLines(data []byte) int {
+	reader := bytes.NewReader(data)
 
-	if err != nil {
-		log.Fatal(err)
-	}
+	scanner := bufio.NewScanner(reader)
 
-	defer fileInfo.Close()
-
-	scanner := bufio.NewScanner(fileInfo)
-
-	lineNumber := 1
+	lineNumber := 0
 
 	for scanner.Scan() {
 		lineNumber++
@@ -96,16 +114,10 @@ func getNumberOfLines(file *string) int {
 	return lineNumber
 }
 
-func getNumberOfWords(file *string) int {
-	fileInfo, err := os.Open(*file)
+func getNumberOfWords(data []byte) int {
+	reader := bytes.NewReader(data)
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer fileInfo.Close()
-
-	scanner := bufio.NewScanner(fileInfo)
+	scanner := bufio.NewScanner(reader)
 
 	wordCount := 0
 
@@ -123,16 +135,10 @@ func getNumberOfWords(file *string) int {
 	return wordCount
 }
 
-func getNumberOfChars(file *string) int {
-	fileInfo, err := os.Open(*file)
+func getNumberOfChars(data []byte) int {
+	reader := bytes.NewReader(data)
 
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	defer fileInfo.Close()
-
-	scanner := bufio.NewScanner(fileInfo)
+	scanner := bufio.NewScanner(reader)
 
 	characterCount := 0
 
